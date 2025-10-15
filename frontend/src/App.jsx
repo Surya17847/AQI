@@ -5,6 +5,9 @@ import { Icon } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './App.css';
 
+// API configuration
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 // Comprehensive Indian cities coordinates with states
 const CITY_COORDINATES = {
   // Delhi NCR
@@ -169,10 +172,35 @@ function App() {
   const [selectedState, setSelectedState] = useState('Delhi NCR');
   const [selectedCity, setSelectedCity] = useState('Delhi');
   const [pollutionRankings, setPollutionRankings] = useState({ mostPolluted: [], cleanest: [] });
+  const [isDarkTheme, setIsDarkTheme] = useState(false);
 
   useEffect(() => {
     generateSyntheticData();
+    
+    // Check user's theme preference from localStorage or system preference
+    const savedTheme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+      setIsDarkTheme(true);
+    }
   }, []);
+
+  // Toggle theme function
+  const toggleTheme = () => {
+    const newTheme = !isDarkTheme;
+    setIsDarkTheme(newTheme);
+    localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+  };
+
+  // Apply theme class to body
+  useEffect(() => {
+    if (isDarkTheme) {
+      document.body.classList.add('dark-theme');
+    } else {
+      document.body.classList.remove('dark-theme');
+    }
+  }, [isDarkTheme]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -347,7 +375,22 @@ function App() {
   const manualAQICategory = getAQICategory(manualAQI);
 
   return (
-    <div className="app">
+    <div className={`app ${isDarkTheme ? 'dark-theme' : ''}`}>
+      {/* Theme Toggle Button */}
+      {/* Theme Toggle Button */}
+    <button className="theme-toggle" onClick={toggleTheme} title={isDarkTheme ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
+      {isDarkTheme ? (
+        // Sun icon for dark mode (switch to light) - Larger size
+        <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+          <path d="M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5S14.76,7,12,7L12,7z M2,13h2c0.55,0,1-0.45,1-1s-0.45-1-1-1H2c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13h2c0.55,0,1-0.45,1-1s-0.45-1-1-1h-2c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M6.34,5.16l-1.42,1.42c-0.39,0.39-0.39,1.02,0,1.41c0.39,0.39,1.02,0.39,1.41,0l1.42-1.42c0.39-0.39,0.39-1.02,0-1.41C7.36,4.77,6.73,4.77,6.34,5.16z M17.66,18.84l-1.42,1.42c-0.39,0.39-0.39,1.02,0,1.41c0.39,0.39,1.02,0.39,1.41,0l1.42-1.42c0.39-0.39,0.39-1.02,0-1.41C18.68,18.45,18.05,18.45,17.66,18.84z"/>
+        </svg>
+      ) : (
+        // Moon icon for light mode (switch to dark) - Larger size
+        <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+          <path d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"/>
+        </svg>
+      )}
+    </button>
       <header className="app-header">
         <div className="header-content">
           <h1>🌍 India Air Quality Index (AQI) Dashboard</h1>
