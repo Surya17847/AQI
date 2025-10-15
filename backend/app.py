@@ -7,6 +7,11 @@ import numpy as np
 app = Flask(__name__)
 CORS(app)
 
+if os.environ.get('RAILWAY_STATIC_URL'):
+    CORS(app, origins=[os.environ.get('RAILWAY_STATIC_URL')])
+else:
+    CORS(app, origins=["http://localhost:3000", "https://your-app.vercel.app"])
+    
 # Load the model and scaler
 with open('model.pkl', 'rb') as f:
     model = pickle.load(f)
@@ -89,4 +94,5 @@ def get_city_coordinates():
     return jsonify(CITY_COORDINATES)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
